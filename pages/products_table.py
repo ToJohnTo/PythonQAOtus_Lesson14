@@ -14,6 +14,7 @@ class ProductsTablePage(LoginAdminPage):
     modify_success_alert = (By.CSS_SELECTOR, ".alert.alert-success.alert-dismissible")
 
     def open_products_table(self):
+        self.logger.info("Открытие страницы с таблицей продуктов")
         # Press Catalog
         self.element(locator=self.catalog_button).click()
         # Press Products
@@ -26,6 +27,8 @@ class ProductsTablePage(LoginAdminPage):
                 break
 
     def add_new_product(self, name, tag, model):
+        self.logger.info("Добавление нового продукта с именем '{}', тэгом '{}' и названием модели '{}'"
+                         .format(name, tag, model))
         # Press Add Product Button
         self.element(locator=self.add_product_button).click()
         # Enter Product Name
@@ -48,6 +51,7 @@ class ProductsTablePage(LoginAdminPage):
         self.element(locator=self.modify_success_alert)
 
     def modify_product_name(self, new_name):
+        self.logger.info("Изменение имени продукта с именем 'ex_name_1' на имя '{}'".format(new_name))
         # Find line with product
         lines = self.driver.find_element_by_css_selector(
             ".table.table-bordered.table-hover").find_elements_by_tag_name("tr")
@@ -73,6 +77,7 @@ class ProductsTablePage(LoginAdminPage):
         self.element(locator=self.modify_success_alert)
 
     def remove_product_with(self, name):
+        self.logger.info("Удаление продукта с именем '{}'".format(name))
         # Find line with product
         lines = self.driver.find_element_by_css_selector(".table.table-bordered.table-hover"). \
             find_elements_by_tag_name("tr")
@@ -86,5 +91,3 @@ class ProductsTablePage(LoginAdminPage):
         self.element(locator=self.trash_button).click()
         # Confirm alert message
         Alert(self.driver).accept()
-        # Check success after remove product
-        # self.element(locator=self.modify_success_alert)

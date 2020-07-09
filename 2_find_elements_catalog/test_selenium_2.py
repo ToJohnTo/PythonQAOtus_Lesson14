@@ -5,17 +5,19 @@ from selenium.webdriver.common.by import By
 
 
 def test_element_by_id(catalog_page):
+    catalog_page.logger.info('====== Started ======')
     catalog_page.element(locator=(By.CSS_SELECTOR, "#logo"))
-    # browser.find_element(By.ID, "logo")
     catalog_page.element(locator=(By.CSS_SELECTOR, "#search"))
-    # browser.find_element_by_id("search")
+    catalog_page.logger.info('====== Finished ======')
 
 
 def test_elements_by_css_selector(catalog_page):
+    catalog_page.logger.info('====== Started ======')
     catalog_page.element(locator=(By.CSS_SELECTOR, ".btn-group.btn-block"))
-    # browser.find_elements(By.CSS_SELECTOR, ".btn-group.btn-block")
+    catalog_page.logger.info('====== Finished ======')
 
 
 def test_element_by_class_name_selector(catalog_page):
+    catalog_page.logger.info('====== Started ======')
     catalog_page.elements(locator=(By.CSS_SELECTOR, ".input-group-btn"))
-    # browser.find_elements_by_class_name("input-group-btn")
+    catalog_page.logger.info('====== Finished ======')
