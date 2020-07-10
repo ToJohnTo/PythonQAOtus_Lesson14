@@ -1,7 +1,10 @@
 import pytest
+import logging
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver import FirefoxOptions, FirefoxProfile
+from selenium.webdriver.support.events import AbstractEventListener, EventFiringWebDriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from pages.base import BasePage
 from pages.catalog import CatalogPage
 from pages.product_card import ProductCardPage
@@ -11,13 +14,24 @@ from pages.products_table import ProductsTablePage
 from pages.upload_file_mozilla_page import UploadFileMozillaPage
 
 
+logging.basicConfig(format='%(levelname)s::%(filename)s::%(funcName)s::%(message)s', filename="logs/selenium.log")
+LOG_LEVEL = 10  # DEBUG
+
+
 def driver_factory(browser):
     if browser == "chrome":
+        logger = logging.getLogger('chrome_fixture')
+        logger.setLevel(LOG_LEVEL)
         options = ChromeOptions()
         options.headless = True
         options.add_argument('--ignore-ssl-errors=yes')
         options.add_argument('--ignore-certificate-errors')
-        driver = webdriver.Chrome(options=options)
+        logger.info("Подготовка среды для запуска тестов...")
+        caps = DesiredCapabilities.CHROME
+        caps['loggingPrefs'] = {'performance': 'ALL', 'browser': 'ALL'}
+        options.add_experimental_option('w3c', False)
+        driver = EventFiringWebDriver(webdriver.Chrome(desired_capabilities=caps, options=options), MyListener())
+        logger.debug("Браузер Chrome запущен со следующими desired_capabilities:{}".format(driver.desired_capabilities))
     elif browser == "firefox":
         profile = FirefoxProfile()
         profile.accept_untrusted_certs = True
@@ -35,9 +49,16 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session")
 def browser(request):
+    logger = logging.getLogger('browser_fixture')
+    logger.setLevel(LOG_LEVEL)
     driver = driver_factory(request.config.getoption("--browser"))
     driver.maximize_window()
-    request.addfinalizer(driver.close)
+
+    def fin():
+        driver.close()
+        logger.debug("Браузер закрыт")
+
+    request.addfinalizer(fin)
     return driver
 
 
@@ -90,3 +111,10 @@ def upload_file_mozilla_page(browser):
     page = UploadFileMozillaPage(browser)
     page.go_to(url="https://developer.mozilla.org/ru/docs/Web/HTML/Element/Input/file")
     return page
+
+
+class MyListener(AbstractEventListener):
+
+    def on_exception(self, exception, driver):
+        logging.error(f'Oooops i got: {exception}')
+        driver.save_screenshot(f'{exception}.png')
